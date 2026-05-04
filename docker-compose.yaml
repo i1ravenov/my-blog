@@ -1,0 +1,13 @@
+services:
+
+  my-blog-back-app:
+    build: ./my-blog-back-app
+    ports:
+      - "8080:8080"
+
+  my-blog-front-app:
+    build: ./my-blog-front-app
+    ports:
+      - "80:80"
+    depends_on:
+      - my-blog-back-app
