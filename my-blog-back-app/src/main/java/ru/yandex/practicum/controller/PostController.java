@@ -1,18 +1,22 @@
-package ru.yandex.practicum.controller; // Класс находится в пакете с контроллерами
+package ru.yandex.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ru.yandex.practicum.dto.NewPostDto;
 import ru.yandex.practicum.model.Page;
+import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.service.PostService;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -35,24 +39,45 @@ public class PostController {
         );
     }
 
+    @PostMapping("/posts")
+    @ResponseBody
+    public Post createNewPost(@RequestBody NewPostDto newPostDto, @RequestParam("image") MultipartFile image) throws IOException {
+        Post result = postService.savePost(newPostDto);
+        postService.updateImage(result.getId(), image);
+        return result;
+    }
+
+    @GetMapping("/posts/{id}")
+    @ResponseBody
+    public Post getPost(@PathVariable long id) {
+        return postService.findById(id);
+    }
+
 
     @GetMapping("/posts/{id}/image")
-    public ResponseEntity<Resource> getImage(@PathVariable long id) throws IOException {
+    public ResponseEntity<Resource> getPostImage(@PathVariable long id) throws IOException {
 
-        Path path = Path.of("images/" + id + ".jpg");
+        Path imagePath = Paths.get(PostService.UPLOAD_DIR + id + ".jpeg");
 
         Resource resource;
 
-        if (Files.exists(path)) {
-            resource = new UrlResource(path.toUri());
+        if (Files.exists(imagePath)) {
+            resource = new UrlResource(imagePath.toUri());
         } else {
-            resource = new UrlResource(
-                    URI.create("https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/960px-No-Image-Placeholder.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20200912122019")
-            );
+            resource = new ClassPathResource("static/default.jpeg");
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
+                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
                 .body(resource);
+    }
+
+    @PutMapping("/posts/{id}/image")
+    public ResponseEntity<Void> updatePostImage(
+            @PathVariable long id,
+            @RequestParam("image") MultipartFile image) throws IOException {
+
+        postService.updateImage(id, image);
+        return ResponseEntity.ok().build();
     }
 }
