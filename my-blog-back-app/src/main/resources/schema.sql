@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS post (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     text TEXT NOT NULL,
-    tags TEXT, -- будем хранить как строку (JSON или CSV)
+    tags TEXT,
     likes_count INT DEFAULT 0,
     comments_count INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS comment (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     text TEXT NOT NULL,
     post_id BIGINT NOT NULL,
     CONSTRAINT fk_comment_post
@@ -25,3 +25,6 @@ INSERT INTO post (id, title, text, tags, likes_count, comments_count) VALUES
 INSERT INTO comment (id, text, post_id) VALUES
 (1, 'Комментарий к посту 1', 1),
 (2, 'Ещё один комментарий к посту 1', 1);
+
+ALTER TABLE post ALTER COLUMN id RESTART WITH 4;
+ALTER TABLE comment ALTER COLUMN id RESTART WITH 3;

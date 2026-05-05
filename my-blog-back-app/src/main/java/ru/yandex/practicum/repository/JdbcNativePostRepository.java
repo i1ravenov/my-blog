@@ -1,13 +1,17 @@
 package ru.yandex.practicum.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
 import ru.yandex.practicum.model.Post;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -68,13 +72,6 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public Post save(NewPostDto newPostDto) {
-
-        String sql = """
-        insert into post (title, text, tags)
-        values (?, ?, ?)
-        returning id, title, text, tags
-    """;
-
         String tagsJson;
         try {
             tagsJson = mapper.writeValueAsString(newPostDto.tags());
@@ -82,29 +79,32 @@ public class JdbcNativePostRepository implements PostRepository {
             throw new RuntimeException(e);
         }
 
-        return jdbcTemplate.queryForObject(
-                sql,
-                (rs, rowNum) -> {
-                    try {
-                        return new Post(
-                                rs.getLong("id"),
-                                rs.getString("title"),
-                                rs.getString("text"),
-                                mapper.readValue(
-                                        rs.getString("tags"),
-                                        new TypeReference<List<String>>() {}
-                                ),
-                                0,
-                                0
-                        );
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                },
-                newPostDto.title(),
-                newPostDto.text(),
-                tagsJson
-        );
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "insert into post (title, text, tags) values (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            ps.setString(1, newPostDto.title());
+            ps.setString(2, newPostDto.text());
+            ps.setString(3, tagsJson);
+            return ps;
+        }, keyHolder);
+
+        return findById(keyHolder.getKey().longValue());
     }
 
+    public List<CommentDto> findAllCommentsForPost(long id) {
+        return jdbcTemplate.query(
+                "select id, text, post_id from comment where post_id = ?",
+                (rs, rowNum) -> {
+                    return new CommentDto(
+                            rs.getLong("id"),
+                            rs.getString("text"),
+                            rs.getLong("post_id")
+                    );
+                },
+                id
+        );
+    }
 }

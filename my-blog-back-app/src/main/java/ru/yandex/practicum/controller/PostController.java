@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
 import ru.yandex.practicum.model.Page;
 import ru.yandex.practicum.model.Post;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -26,8 +28,8 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/posts") // Принимаем GET-запрос по адресу /home
-    @ResponseBody        // Указываем, что возвращаемое значение является ответом
+    @GetMapping("/posts")
+    @ResponseBody
     public Page getPage(@RequestParam("search") String search,
                         @RequestParam("pageNumber") int pageNumber,
                         @RequestParam("pageSize") int pageSize) {
@@ -39,12 +41,10 @@ public class PostController {
         );
     }
 
-    @PostMapping("/posts")
     @ResponseBody
-    public Post createNewPost(@RequestBody NewPostDto newPostDto, @RequestParam("image") MultipartFile image) throws IOException {
-        Post result = postService.savePost(newPostDto);
-        postService.updateImage(result.getId(), image);
-        return result;
+    @PostMapping("/posts")
+    public Post createNewPost(@RequestBody NewPostDto newPostDto) {
+        return postService.savePost(newPostDto);
     }
 
     @GetMapping("/posts/{id}")
@@ -53,6 +53,14 @@ public class PostController {
         return postService.findById(id);
     }
 
+    @GetMapping("/posts/{id}/comments")
+    public List<CommentDto> getCommentsForPost(@PathVariable String id) {
+        try {
+            return postService.findAllCommentsForPost(Long.parseLong(id));
+        } catch (NumberFormatException e) {
+            return List.of();
+        }
+    }
 
     @GetMapping("/posts/{id}/image")
     public ResponseEntity<Resource> getPostImage(@PathVariable long id) throws IOException {

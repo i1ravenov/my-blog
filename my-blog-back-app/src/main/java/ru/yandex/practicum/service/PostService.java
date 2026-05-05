@@ -4,6 +4,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
@@ -55,5 +56,9 @@ public class PostService {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public List<CommentDto> findAllCommentsForPost(long id) {
+        return postRepository.findAllCommentsForPost(id);
     }
 }

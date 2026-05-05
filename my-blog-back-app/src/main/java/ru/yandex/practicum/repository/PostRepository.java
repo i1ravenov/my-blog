@@ -1,5 +1,6 @@
 package ru.yandex.practicum.repository;
 
+import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
 import ru.yandex.practicum.model.Post;
 
@@ -11,4 +12,6 @@ public interface PostRepository {
     Post findById(long id);
 
     Post save(NewPostDto newPostDto);
+
+    List<CommentDto> findAllCommentsForPost(long id);
 }
