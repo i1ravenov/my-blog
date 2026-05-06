@@ -78,4 +78,8 @@ public class PostService {
     public Post updatePost(UpdatePostDto updatePostDto) {
         return postRepository.updatePost(updatePostDto);
     }
+
+    public void deletePost(long postId) {
+        postRepository.deletePost(postId);
+    }
 }

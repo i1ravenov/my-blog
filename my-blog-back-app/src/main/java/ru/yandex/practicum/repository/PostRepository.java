@@ -23,4 +23,6 @@ public interface PostRepository {
     CommentDto updateComment(long postId, long commentId, String text);
 
     Post updatePost(UpdatePostDto updatePostDto);
+
+    void deletePost(long postId);
 }

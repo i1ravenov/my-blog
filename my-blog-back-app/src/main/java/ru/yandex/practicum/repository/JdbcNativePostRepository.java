@@ -17,11 +17,12 @@ import java.util.List;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository {
-    private static ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate, ObjectMapper mapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.mapper = mapper;
     }
 
     @Override
@@ -175,5 +176,10 @@ public class JdbcNativePostRepository implements PostRepository {
                 },
                 updatePostDto.id()
         );
+    }
+
+    @Override
+    public void deletePost(long postId) {
+        jdbcTemplate.update("delete from post where id = ?", postId);
     }
 }

@@ -85,7 +85,9 @@ public class PostController {
     public ResponseEntity<Void> updatePostImage(
             @PathVariable long id,
             @RequestParam("image") MultipartFile image) throws IOException {
-
+        if (image.isEmpty()) {
+            return ResponseEntity.ok().build();
+        }
         postService.updateImage(id, image);
         return ResponseEntity.ok().build();
     }
@@ -112,5 +114,10 @@ public class PostController {
     @PutMapping("/posts/{id}")
     public Post updatePost(@RequestBody UpdatePostDto updatePostDto) {
         return postService.updatePost(updatePostDto);
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public void deletePost(@PathVariable long id) {
+        postService.deletePost(id);
     }
 }
