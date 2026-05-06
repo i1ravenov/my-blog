@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
+import ru.yandex.practicum.dto.UpdatePostDto;
 import ru.yandex.practicum.model.Page;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.service.PostService;
@@ -87,5 +88,29 @@ public class PostController {
 
         postService.updateImage(id, image);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/{id}/comments")
+    public CommentDto addComment(@PathVariable long id, @RequestBody CommentDto commentDto) {
+        return postService.saveComment(new CommentDto(0, commentDto.text(), id));
+    }
+
+    @DeleteMapping("/posts/{postId}/comments/{id}")
+    public ResponseEntity<Void> deleteComment(@PathVariable long postId, @PathVariable long id) {
+        postService.deleteComment(postId, id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/posts/{postId}/comments/{id}")
+    public CommentDto updateComment(
+            @PathVariable long postId,
+            @PathVariable long id,
+            @RequestBody CommentDto commentDto) {
+        return postService.updateComment(postId, id, commentDto.text());
+    }
+
+    @PutMapping("/posts/{id}")
+    public Post updatePost(@RequestBody UpdatePostDto updatePostDto) {
+        return postService.updatePost(updatePostDto);
     }
 }

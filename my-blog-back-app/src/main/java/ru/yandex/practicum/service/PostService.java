@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.practicum.dto.CommentDto;
 import ru.yandex.practicum.dto.NewPostDto;
+import ru.yandex.practicum.dto.UpdatePostDto;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
 
@@ -60,5 +61,21 @@ public class PostService {
 
     public List<CommentDto> findAllCommentsForPost(long id) {
         return postRepository.findAllCommentsForPost(id);
+    }
+
+    public CommentDto saveComment(CommentDto commentDto) {
+        return postRepository.saveComment(commentDto);
+    }
+
+    public void deleteComment(long postId, long commentId) {
+        postRepository.deleteComment(postId, commentId);
+    }
+
+    public CommentDto updateComment(long postId, long commentId, String text) {
+        return postRepository.updateComment(postId, commentId, text);
+    }
+
+    public Post updatePost(UpdatePostDto updatePostDto) {
+        return postRepository.updatePost(updatePostDto);
     }
 }
