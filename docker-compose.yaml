@@ -1,0 +1,18 @@
+services:
+
+  my-blog-back-app:
+    build: ./my-blog-back-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+
+  my-blog-front-app:
+    build: ./my-blog-front-app
+    ports:
+      - "80:80"
+    depends_on:
+      - my-blog-back-app
+
+volumes:
+  uploads_data:
